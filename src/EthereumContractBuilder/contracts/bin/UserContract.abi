@@ -1,0 +1,1 @@
+[{"constant":false,"inputs":[{"name":"recepient","type":"address"},{"name":"value","type":"uint256"}],"name":"transferMoney","outputs":[],"type":"function"},{"inputs":[{"name":"mainContractAddress","type":"address"}],"type":"constructor"}]
