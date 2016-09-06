@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,7 +35,9 @@ namespace EthereumTest.Init
 
 		public static void RegisterTypes(IUnityContainer container)
 		{
-			var settings = GeneralSettingsReader.ReadGeneralSettings<BaseSettings>(ConfigurationManager.AppSettings["ConnectionString"]);
+			var file = File.ReadAllText(@"..\..\..\..\settings\generalsettings.json");
+			var settings = GeneralSettingsReader.ReadSettingsFromData<BaseSettings>(file);
+
 			container.RegisterInstance<IBaseSettings>(settings);
 
 			var log = new LogToTable(new AzureTableStorage<LogEntity>(settings.Db.LogsConnString, "LogApi", null));

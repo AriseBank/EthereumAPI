@@ -114,7 +114,7 @@ namespace EthereumTest
 		{
 			var secondAccount = "0x13F022d72158410433CBd66f5DD8bF6D2D129924";
 
-			var web3 = new Web3();
+			var web3 = new Web3(_settings.EthereumUrl);
 
 			await web3.Personal.UnlockAccount.SendRequestAsync(_settings.EthereumMainAccount, _settings.EthereumMainAccountPassword, new HexBigInteger(120));
 
