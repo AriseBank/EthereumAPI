@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EthereumCore;
 using EthereumCore.Azure;
+using EthereumCore.Exceptions;
 
 namespace EthereumServices
 {
@@ -17,16 +18,26 @@ namespace EthereumServices
 
 	public class ContractQueueService : IContractQueueService
 	{
+		private readonly IEmailNotifierService _emailNotifier;
 		private readonly IQueueExt _queue;
 
-		public ContractQueueService(Func<string, IQueueExt> queueFactory)
+		public ContractQueueService(Func<string, IQueueExt> queueFactory, IEmailNotifierService emailNotifier)
 		{
+			_emailNotifier = emailNotifier;
 			_queue = queueFactory(Constants.EthereumContractQueue);
 		}
 
 		public async Task<string> GetContract()
 		{
-			return await _queue.Pop();
+			var contract = await _queue.Pop();
+
+			if (string.IsNullOrWhiteSpace(contract))
+			{
+				_emailNotifier.Warning("Ethereum", "User contract pool is empty!");
+				throw new BackendException(BackendExceptionType.ContractPoolEmpty);
+			}
+
+			return contract;
 		}
 
 		public async Task PushContract(string contract)

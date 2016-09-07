@@ -25,6 +25,7 @@ namespace EthereumApiSelfHosted
 			container.RegisterType<IContractService, ContractService>();
 			container.RegisterType<IPaymentService, PaymentService>();
 			container.RegisterType<IContractQueueService, ContractQueueService>();
+			container.RegisterType<IEmailNotifierService, EmailNotifierService>();
 
 			container.RegisterType<Func<string, IQueueExt>>(new InjectionFactory(c =>
 				new Func<string, IQueueExt>(x =>

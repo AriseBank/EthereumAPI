@@ -21,15 +21,14 @@ namespace EthereumApiSelfHosted.Controllers
 		[ResponseType(typeof(RegisterResponse))]
 		public async Task<IHttpActionResult> NewClient()
 		{
-			string contract;
+			var contract = await _contractQueueService.GetContract();
 
-			while (string.IsNullOrWhiteSpace(contract = await _contractQueueService.GetContract()))
-				await Task.Delay(100);
-
-			return Ok(new RegisterResponse
+			var response = new RegisterResponse
 			{
 				Contract = contract
-			});
+			};
+
+			return Ok(response);
 		}
 	}
 }

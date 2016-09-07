@@ -91,6 +91,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="ContractEvents\UserPaymentEvent.cs" />
     <Compile Include="Encryption.cs" />
+    <Compile Include="Exceptions\BackendException.cs" />
     <Compile Include="Log\LogToConsole.cs" />
     <Compile Include="Log\LogToTableAndConsole.cs" />
     <Compile Include="Settings\BaseSettings.cs" />

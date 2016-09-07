@@ -108,7 +108,7 @@ namespace EthereumTest
 			Assert.AreEqual(1234, amount);
 		}
 
-		[Ignore]
+		//[Ignore]
 		[TestMethod]
 		public async Task CreateUserContract()
 		{
@@ -133,13 +133,13 @@ namespace EthereumTest
 			
 			var filter = await contract.CreateFilterAsync();
 
-			int amount = 900;
+			int amount = 1;
 
 			// transfer from main account to second account (imagine that second account is external user account)
-			await TransferFunds(web3, _settings.EthereumMainAccount, secondAccount, amount + 10, _settings.EthereumMainAccountPassword);
+			//await TransferFunds(web3, _settings.EthereumMainAccount, secondAccount, amount + 1, _settings.EthereumMainAccountPassword);
 
 			// user transfer ethers from his external account to our contract)
-			await TransferFunds(web3, secondAccount, userContractAddress, 900, _settings.EthereumMainAccountPassword);
+			await TransferFunds(web3, _settings.EthereumMainAccount, userContractAddress, amount, _settings.EthereumMainAccountPassword);
 
 			// we receive event from main contract about payment (contract address and amount)
 

@@ -30,8 +30,6 @@ namespace EthereumApiSelfHosted
 			WebApiConfig.Register(configuration);
 
 			app.UseWebApi(configuration);
-
-			System.Console.WriteLine("Startup processed");
 		}
 	}
 }
