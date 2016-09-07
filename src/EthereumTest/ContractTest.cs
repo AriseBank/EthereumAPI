@@ -108,7 +108,7 @@ namespace EthereumTest
 			Assert.AreEqual(1234, amount);
 		}
 
-		//[Ignore]
+		[Ignore]
 		[TestMethod]
 		public async Task CreateUserContract()
 		{
