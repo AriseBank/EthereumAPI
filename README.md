@@ -39,4 +39,5 @@ How to setup build and run Ethereum Api.
 * Run JobRunner.exe
 * 
 
-https://ci.appveyor.com/api/projects/status/q3eafe8yjc5x36qt?svg=true
+
+![.Last build status](https://ci.appveyor.com/api/projects/status/q3eafe8yjc5x36qt?svg=true)
