@@ -23,6 +23,8 @@ namespace EthereumWebJob.Job
 		private readonly IEmailNotifierService _emailNotifier;
 		private readonly ILog _logger;
 
+		private bool _balanceWarningSended;
+
 		public CheckContractQueueCountJob(IContractQueueService contractQueueService, IContractService contractService, IBaseSettings settings, IPaymentService paymentService, IEmailNotifierService emailNotifier, ILog logger)
 			: this("CheckContractQueueCountJob", TimerPeriodSeconds * 1000, logger)
 		{
@@ -62,8 +64,21 @@ namespace EthereumWebJob.Job
 			{
 				var balance = await _paymentService.GetMainAccountBalance();
 				if (balance < _settings.MainAccountMinBalance)
-					_emailNotifier.Warning("Ethereum worker",
-						$"Main account {_settings.EthereumMainAccount} balance is less that {_settings.MainAccountMinBalance} ETH !");
+				{
+					string message =
+						$"Main account {_settings.EthereumMainAccount} balance is less that {_settings.MainAccountMinBalance} ETH !";
+					await _logger.WriteWarning("EthereumWebJob", "InternalBalanceCheck", "", message);
+
+					if (!_balanceWarningSended)
+						_emailNotifier.Warning("Ethereum worker", message);
+
+					_balanceWarningSended = true;
+				}
+				else
+				{
+					// reset if balance become higher
+					_balanceWarningSended = false;
+				}
 			}
 			catch (Exception e)
 			{
