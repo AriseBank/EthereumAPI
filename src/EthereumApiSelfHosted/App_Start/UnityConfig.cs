@@ -16,7 +16,10 @@ namespace EthereumApiSelfHosted
 
 			container.RegisterInstance(settings);
 
-			var logToTable = new LogToTable(new AzureTableStorage<LogEntity>(settings.Db.LogsConnString, "EthereumLogApi", null));
+			var logToTable = new LogToTable(
+				new AzureTableStorage<LogEntity>(settings.Db.LogsConnString, "ApiError", null),
+				new AzureTableStorage<LogEntity>(settings.Db.LogsConnString, "ApiWarning", null),
+				new AzureTableStorage<LogEntity>(settings.Db.LogsConnString, "ApiInfo", null));
 			container.RegisterInstance(logToTable);
 			container.RegisterType<LogToConsole>();
 

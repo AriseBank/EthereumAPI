@@ -99,6 +99,7 @@
     <Compile Include="Log\LogToTable.cs" />
     <Compile Include="Log\LogEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Timers\TimerPeriod.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

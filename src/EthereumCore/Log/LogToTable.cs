@@ -17,11 +17,17 @@ namespace EthereumCore.Log
 
 	public class LogToTable : ILog
 	{
-		private readonly INoSQLTableStorage<LogEntity> _tableStorage;
+		private readonly INoSQLTableStorage<LogEntity> _errorTableStorage;
+		private readonly INoSQLTableStorage<LogEntity> _warningTableStorage;
+		private readonly INoSQLTableStorage<LogEntity> _infoTableStorage;
 
-		public LogToTable(INoSQLTableStorage<LogEntity> tableStorage)
+		public LogToTable(INoSQLTableStorage<LogEntity> errorTableStorage,
+							INoSQLTableStorage<LogEntity> warningTableStorage,
+							INoSQLTableStorage<LogEntity> infoTableStorage)
 		{
-			_tableStorage = tableStorage;
+			_errorTableStorage = errorTableStorage;
+			_warningTableStorage = warningTableStorage;
+			_infoTableStorage = infoTableStorage;
 		}
 
 
@@ -30,7 +36,13 @@ namespace EthereumCore.Log
 		{
 			var dt = dateTime ?? DateTime.UtcNow;
 			var newEntity = LogEntity.Create(level, component, process, context, type, stack, msg, dt);
-			await _tableStorage.InsertAndGenerateRowKeyAsTimeAsync(newEntity, dt);
+
+			if (level == "error" || level == "fatalerror")
+				await _errorTableStorage.InsertAndGenerateRowKeyAsTimeAsync(newEntity, dt);
+			if (level == "warning")
+				await _warningTableStorage.InsertAndGenerateRowKeyAsTimeAsync(newEntity, dt);
+			if (level == "info")
+				await _infoTableStorage.InsertAndGenerateRowKeyAsTimeAsync(newEntity, dt);
 		}
 
 		public Task WriteInfo(string component, string process, string context, string info, DateTime? dateTime = null)

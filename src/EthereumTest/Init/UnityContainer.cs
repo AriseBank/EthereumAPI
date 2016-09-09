@@ -40,7 +40,11 @@ namespace EthereumTest.Init
 
 			container.RegisterInstance<IBaseSettings>(settings);
 
-			var log = new LogToTable(new AzureTableStorage<LogEntity>(settings.Db.LogsConnString, "LogApi", null));
+			var log = new LogToTable(
+				new AzureTableStorage<LogEntity>(settings.Db.LogsConnString, "TestError", null),
+				new AzureTableStorage<LogEntity>(settings.Db.LogsConnString, "TestWarning", null),
+				new AzureTableStorage<LogEntity>(settings.Db.LogsConnString, "TestInfo", null));
+
 			container.RegisterInstance<ILog>(log);
 			
 			container.RegisterType<IContractService, ContractService>();

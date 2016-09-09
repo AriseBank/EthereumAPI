@@ -7,8 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using EthereumCore;
 using EthereumCore.Settings;
+using EthereumWebJob.Config;
 using EthereumWebJob.Job;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Practices.Unity;
 
 namespace JobRunner
 {
@@ -27,27 +28,43 @@ namespace JobRunner
 				return;
 			}
 
-			var container = new UnityConfig();
-			container.InitContainer(settings);
-
-			var config = new JobHostConfiguration
+			try
 			{
-				JobActivator = container,
-				StorageConnectionString = settings.Db.JobStorageConnString,
-				DashboardConnectionString = settings.Db.JobStorageConnString,
-				Tracing = { ConsoleLevel = TraceLevel.Error }
-			};
+				CheckSettings(settings);
+			}
+			catch(Exception e)
+			{
+				Console.WriteLine(e.Message);
+				Console.WriteLine("Press any key to exit...");
+				Console.ReadKey();
+				return;
+			}
 
-#if DEBUG
-			config.HostId = "developmenthost";
-			config.UseDevelopmentSettings();
-#endif
-			config.UseTimers();
+			Console.WriteLine("Settings checked!");
+
+			var container = UnityConfig.InitContainer(settings);
+
+			try
+			{
+				container.Resolve<CheckContractQueueCountJob>().Start();
+				container.Resolve<CheckPaymentsToUserContractsJob>().Start();
+				container.Resolve<RefreshContractQueueJob>().Start();
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("cannot start jobs! Exception: " + e.Message);
+				Console.WriteLine("Press any key to exit...");
+				Console.ReadKey();
+				return;
+			}
 
 			Console.WriteLine("Web job started");
+			Console.WriteLine("Utc time: " + DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
 
-			var host = new JobHost(config);
-			host.RunAndBlock();
+			Console.WriteLine("Press 'q' to quit.");
+
+			while (Console.ReadLine() != "q") continue;
+
 		}
 
 		static BaseSettings GetSettings()
@@ -61,7 +78,7 @@ namespace JobRunner
 			}
 
 			BaseSettings settings = GeneralSettingsReader.ReadSettingsFromData<BaseSettings>(settingsData);
-			
+
 			return settings;
 		}
 
@@ -79,6 +96,39 @@ namespace JobRunner
 			{
 				return null;
 			}
+		}
+
+		static void CheckSettings(BaseSettings settings)
+		{
+			if (string.IsNullOrWhiteSpace(settings.EthereumMainAccount))
+				throw new Exception("EthereumMainAccount is missing");
+			if (string.IsNullOrWhiteSpace(settings.EthereumMainAccountPassword))
+				throw new Exception("EthereumMainAccountPassword is missing");
+			if (string.IsNullOrWhiteSpace(settings.EthereumMainContractAddress))
+				throw new Exception("EthereumMainContractAddress is missing");
+			if (string.IsNullOrWhiteSpace(settings.EthereumPrivateAccount))
+				throw new Exception("EthereumPrivateAccount is missing");
+			if (string.IsNullOrWhiteSpace(settings.EthereumUrl))
+				throw new Exception("EthereumUrl is missing");
+
+			if (string.IsNullOrWhiteSpace(settings.Db?.DataConnString))
+				throw new Exception("DataConnString is missing");
+			if (string.IsNullOrWhiteSpace(settings.Db?.LogsConnString))
+				throw new Exception("LogsConnString is missing");
+			if (string.IsNullOrWhiteSpace(settings.Db?.EthereumOutQueueConnString))
+				throw new Exception("EthereumOutQueueConnString is missing");
+			if (string.IsNullOrWhiteSpace(settings.Db?.ClientPersonalInfoConnString))
+				throw new Exception("ClientPersonalInfoConnString is missing");
+
+			if (string.IsNullOrWhiteSpace(settings.MainContract?.Abi))
+				throw new Exception("MainContract abi is invalid");
+			if (string.IsNullOrWhiteSpace(settings.MainContract?.ByteCode))
+				throw new Exception("MainContract bytecode is invalid");
+
+			if (string.IsNullOrWhiteSpace(settings.UserContract?.Abi))
+				throw new Exception("UserContract abi is invalid");
+			if (string.IsNullOrWhiteSpace(settings.UserContract?.ByteCode))
+				throw new Exception("UserContract bytecode is invalid");
 		}
 	}
 }
