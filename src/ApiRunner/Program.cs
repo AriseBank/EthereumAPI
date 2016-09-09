@@ -31,6 +31,19 @@ namespace ApiRunner
 				return;
 			}
 
+
+			try
+			{
+				CheckSettings(settings);
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.Message);
+				Console.WriteLine("Press any key to exit...");
+				Console.ReadKey();
+				return;
+			}
+
 			var services = (ServiceProvider)ServicesFactory.Create();
 			services.AddInstance<IBaseSettings>(settings);
 
@@ -80,6 +93,40 @@ namespace ApiRunner
 #else
 			return File.ReadAllText("generalsettings.json");
 #endif
+		}
+
+
+		static void CheckSettings(BaseSettings settings)
+		{
+			if (string.IsNullOrWhiteSpace(settings.EthereumMainAccount))
+				throw new Exception("EthereumMainAccount is missing");
+			if (string.IsNullOrWhiteSpace(settings.EthereumMainAccountPassword))
+				throw new Exception("EthereumMainAccountPassword is missing");
+			if (string.IsNullOrWhiteSpace(settings.EthereumMainContractAddress))
+				throw new Exception("EthereumMainContractAddress is missing");
+			if (string.IsNullOrWhiteSpace(settings.EthereumPrivateAccount))
+				throw new Exception("EthereumPrivateAccount is missing");
+			if (string.IsNullOrWhiteSpace(settings.EthereumUrl))
+				throw new Exception("EthereumUrl is missing");
+
+			if (string.IsNullOrWhiteSpace(settings.Db?.DataConnString))
+				throw new Exception("DataConnString is missing");
+			if (string.IsNullOrWhiteSpace(settings.Db?.LogsConnString))
+				throw new Exception("LogsConnString is missing");
+			if (string.IsNullOrWhiteSpace(settings.Db?.EthereumOutQueueConnString))
+				throw new Exception("EthereumOutQueueConnString is missing");
+			if (string.IsNullOrWhiteSpace(settings.Db?.ClientPersonalInfoConnString))
+				throw new Exception("ClientPersonalInfoConnString is missing");
+
+			if (string.IsNullOrWhiteSpace(settings.MainContract?.Abi))
+				throw new Exception("MainContract abi is invalid");
+			if (string.IsNullOrWhiteSpace(settings.MainContract?.ByteCode))
+				throw new Exception("MainContract bytecode is invalid");
+
+			if (string.IsNullOrWhiteSpace(settings.UserContract?.Abi))
+				throw new Exception("UserContract abi is invalid");
+			if (string.IsNullOrWhiteSpace(settings.UserContract?.ByteCode))
+				throw new Exception("UserContract bytecode is invalid");
 		}
 	}
 }
