@@ -64,7 +64,6 @@ namespace EthereumCore.Settings
 		public string DataConnString { get; set; }
 		public string LogsConnString { get; set; }
 
-		public string EthereumOutQueueConnString { get; set; }
-		public string ClientPersonalInfoConnString { get; set; }
+		public string ExchangeQueueConnString { get; set; }
 	}
 }

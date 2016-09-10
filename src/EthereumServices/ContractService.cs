@@ -103,7 +103,7 @@ namespace EthereumServices
 			var ev = contract.GetEvent("PaymentFromUser");
 
 			var logs = await web3.Eth.Filters.GetFilterChangesForEthNewFilter.SendRequestAsync(filter);
-
+			
 			if (logs == null)
 				return null;
 

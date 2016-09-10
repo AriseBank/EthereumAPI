@@ -23,8 +23,6 @@
 	"Db": {
 		"DataConnString": "",
 		"LogsConnString": "",
-		"JobStorageConnString": "",
-		"EthereumOutQueueConnString": "",
-		"ClientPersonalInfoConnString": ""
+		"ExchangeQueueConnString": ""
 	}
 }

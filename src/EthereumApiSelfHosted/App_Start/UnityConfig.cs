@@ -36,10 +36,11 @@ namespace EthereumApiSelfHosted
 					switch (x)
 					{
 						case Constants.EthereumContractQueue:
+							return new AzureQueueExt(settings.Db.DataConnString, x);
 						case Constants.EthereumOutQueue:
-							return new AzureQueueExt(settings.Db.EthereumOutQueueConnString, x);
+							return new AzureQueueExt(settings.Db.ExchangeQueueConnString, x);
 						case Constants.EmailNotifierQueue:
-							return new AzureQueueExt(settings.Db.ClientPersonalInfoConnString, x);
+							return new AzureQueueExt(settings.Db.ExchangeQueueConnString, x);
 						default:
 							throw new Exception("Queue is not registered");
 					}

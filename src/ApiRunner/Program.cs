@@ -113,10 +113,8 @@ namespace ApiRunner
 				throw new Exception("DataConnString is missing");
 			if (string.IsNullOrWhiteSpace(settings.Db?.LogsConnString))
 				throw new Exception("LogsConnString is missing");
-			if (string.IsNullOrWhiteSpace(settings.Db?.EthereumOutQueueConnString))
-				throw new Exception("EthereumOutQueueConnString is missing");
-			if (string.IsNullOrWhiteSpace(settings.Db?.ClientPersonalInfoConnString))
-				throw new Exception("ClientPersonalInfoConnString is missing");
+			if (string.IsNullOrWhiteSpace(settings.Db?.ExchangeQueueConnString))
+				throw new Exception("ExchangeQueueConnString is missing");
 
 			if (string.IsNullOrWhiteSpace(settings.MainContract?.Abi))
 				throw new Exception("MainContract abi is invalid");
