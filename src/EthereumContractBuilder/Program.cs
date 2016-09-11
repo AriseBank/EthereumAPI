@@ -23,7 +23,6 @@ namespace EhtereumContractBuilder
 			{
 				Console.WriteLine("Choose number: ");
 				Console.WriteLine("1. Deploy main contract from local json file");
-				//Console.WriteLine("2. Create main contract PaymentFromUser event and store in local json file");
 				Console.WriteLine("0. Exit");
 
 				var input = Console.ReadLine();
@@ -86,29 +85,6 @@ namespace EhtereumContractBuilder
 
 				settings.EthereumMainContractAddress = contractAddress;
 				Console.WriteLine("New contract: " + contractAddress);
-
-				File.WriteAllText("generalsettings.json", JsonConvert.SerializeObject(settings, Formatting.Indented));
-
-				Console.WriteLine("Contract address stored in generalsettings.json file");
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine("Action failed!");
-				Console.WriteLine(e.Message);
-			}
-		}
-
-		static async Task CreatePaymentEvent()
-		{
-			Console.WriteLine("Begin event creating");
-			try
-			{
-				var json = File.ReadAllText("generalsettings.json");
-				var settings = JsonConvert.DeserializeObject<BaseSettings>(json);
-				var eventAddress = await new ContractService(settings).CreateFilterEventForUserContractPayment();
-
-				//settings.EthereumMainContractPaymentEventAddress = eventAddress.HexValue;
-				Console.WriteLine("New event address: " + eventAddress.HexValue);
 
 				File.WriteAllText("generalsettings.json", JsonConvert.SerializeObject(settings, Formatting.Indented));
 

@@ -41,7 +41,7 @@ namespace EthereumWebJob.Config
 						case Constants.EthereumContractQueue:
 							return new AzureQueueExt(settings.Db.DataConnString, x);
 						case Constants.EthereumOutQueue:
-							return new AzureQueueExt(settings.Db.ExchangeQueueConnString, x);
+							return new AzureQueueExt(settings.Db.EthereumNotificationsConnString, x);
 						case Constants.EmailNotifierQueue:
 							return new AzureQueueExt(settings.Db.ExchangeQueueConnString, x);
 						default:

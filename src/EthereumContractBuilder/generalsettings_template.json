@@ -23,6 +23,7 @@
 	"Db": {
 		"DataConnString": "",
 		"LogsConnString": "",
+		"EthereumNotificationsConnString": "",
 		"ExchangeQueueConnString": ""
 	}
 }

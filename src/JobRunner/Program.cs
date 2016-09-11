@@ -117,6 +117,8 @@ namespace JobRunner
 				throw new Exception("LogsConnString is missing");
 			if (string.IsNullOrWhiteSpace(settings.Db?.ExchangeQueueConnString))
 				throw new Exception("ExchangeQueueConnString is missing");
+			if (string.IsNullOrWhiteSpace(settings.Db?.EthereumNotificationsConnString))
+				throw new Exception("EthereumNotificationsConnString is missing");
 
 			if (string.IsNullOrWhiteSpace(settings.MainContract?.Abi))
 				throw new Exception("MainContract abi is invalid");
