@@ -108,7 +108,7 @@ namespace EthereumServices
 				return null;
 
 			// group by because of block chain reconstructions
-			return ev.DecodeAllEvents<UserPaymentEvent>(logs)
+			return Event.DecodeAllEvents<UserPaymentEvent>(logs)
 				.GroupBy(x => new { x.Log.Address, x.Log.Data })
 				.Select(x => x.First().Event)
 				.ToArray();

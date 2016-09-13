@@ -37,11 +37,11 @@ namespace EthereumTest
 			_settings = UnityConfig.GetConfiguredContainer().Resolve<IBaseSettings>();
 		}
 
-		[Ignore]
+		//[Ignore]
 		[TestMethod]
 		public async Task GetMoneyFromContract()
 		{
-			var web3 = new Web3();
+			var web3 = new Web3(_settings.EthereumUrl);
 
 			await web3.Personal.UnlockAccount.SendRequestAsync(_settings.EthereumMainAccount, _settings.EthereumMainAccountPassword, new HexBigInteger(120));
 
@@ -58,10 +58,10 @@ namespace EthereumTest
 			var contract = web3.Eth.GetContract(_settings.UserContract.Abi, userContractAddress);
 			
 
-			int amount = 900;
+			int amount = 1;
 
 			// transfer from main account to second account (imagine that second account is external user account)
-			await TransferFunds(web3, _settings.EthereumMainAccount, userContractAddress, amount + 10, _settings.EthereumMainAccountPassword);
+			await TransferFunds(web3, _settings.EthereumMainAccount, userContractAddress, amount, _settings.EthereumMainAccountPassword);
 
 			var function = contract.GetFunction("transferMoney");
 
@@ -147,7 +147,7 @@ namespace EthereumTest
 
 			Assert.IsNotNull(logs);
 
-			var eventLogs = ev.DecodeAllEvents<UserPaymentEvent>(logs);
+			var eventLogs = Event.DecodeAllEvents<UserPaymentEvent>(logs);
 
 			Assert.AreEqual(userContractAddress, eventLogs[0].Event.Address);
 			Assert.AreEqual(amount, UnitConversion.Convert.FromWei(eventLogs[0].Event.Amount));
@@ -156,6 +156,7 @@ namespace EthereumTest
 			
 			Assert.IsNull(logs);
 		}
+
 
 		private async Task TransferFunds(Web3 web3, string from, string to, int amount, string password)
 		{
