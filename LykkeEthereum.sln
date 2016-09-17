@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiRunner", "src\ApiRunner\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Runners", "Runners", "{43ABD980-F84F-406C-A639-CF9D1C2F262E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureStorage", "src\AzureStorage\AzureStorage.csproj", "{AE077E71-01F9-4D30-B615-E2A63BEF1164}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,14 @@ Global
 		{8E9ACF16-0EB6-4647-89A2-15D10741087D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8E9ACF16-0EB6-4647-89A2-15D10741087D}.Release|x64.ActiveCfg = Release|Any CPU
 		{8E9ACF16-0EB6-4647-89A2-15D10741087D}.Release|x64.Build.0 = Release|Any CPU
+		{AE077E71-01F9-4D30-B615-E2A63BEF1164}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE077E71-01F9-4D30-B615-E2A63BEF1164}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE077E71-01F9-4D30-B615-E2A63BEF1164}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AE077E71-01F9-4D30-B615-E2A63BEF1164}.Debug|x64.Build.0 = Debug|Any CPU
+		{AE077E71-01F9-4D30-B615-E2A63BEF1164}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE077E71-01F9-4D30-B615-E2A63BEF1164}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE077E71-01F9-4D30-B615-E2A63BEF1164}.Release|x64.ActiveCfg = Release|Any CPU
+		{AE077E71-01F9-4D30-B615-E2A63BEF1164}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

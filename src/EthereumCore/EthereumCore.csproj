@@ -81,23 +81,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Azure\AzureBlobStorage.cs" />
-    <Compile Include="Azure\AzureTableStorage.cs" />
-    <Compile Include="Azure\AzureTableStorageUtils.cs" />
-    <Compile Include="Azure\CloudConfigurationLoader.cs" />
-    <Compile Include="Azure\IBlobStorage.cs" />
-    <Compile Include="Azure\NoSQLTableStorage.cs" />
-    <Compile Include="Azure\QueueExt.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ContractEvents\UserPaymentEvent.cs" />
     <Compile Include="Encryption.cs" />
     <Compile Include="Exceptions\BackendException.cs" />
+    <Compile Include="Log\ILog.cs" />
     <Compile Include="Log\LogToConsole.cs" />
-    <Compile Include="Log\LogToTableAndConsole.cs" />
+    <Compile Include="Monitoring\IMonitoringRepository.cs" />
     <Compile Include="Settings\BaseSettings.cs" />
-    <Compile Include="Settings\GeneralSettingsReader.cs" />
-    <Compile Include="Log\LogToTable.cs" />
-    <Compile Include="Log\LogEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Timers\TimerPeriod.cs" />
     <Compile Include="Utils.cs" />

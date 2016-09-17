@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AzureStorage;
 using EthereumApiSelfHosted;
 using EthereumCore;
 using EthereumCore.Settings;

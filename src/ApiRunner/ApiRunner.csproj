@@ -93,6 +93,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AzureStorage\AzureStorage.csproj">
+      <Project>{AE077E71-01F9-4D30-B615-E2A63BEF1164}</Project>
+      <Name>AzureStorage</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EthereumApiSelfHosted\EthereumApiSelfHosted.csproj">
       <Project>{A5BDBEA1-6FF2-4237-BA7C-266BBB4DEDC8}</Project>
       <Name>EthereumApiSelfHosted</Name>

@@ -5,8 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AzureStorage;
 using EthereumCore;
 using EthereumCore.Settings;
+using EthereumWebJob;
 using EthereumWebJob.Config;
 using EthereumWebJob.Job;
 using Microsoft.Practices.Unity;
@@ -46,9 +48,7 @@ namespace JobRunner
 
 			try
 			{
-				container.Resolve<CheckContractQueueCountJob>().Start();
-				container.Resolve<CheckPaymentsToUserContractsJob>().Start();
-				container.Resolve<RefreshContractQueueJob>().Start();
+				JobFactory.RunJobs(container);
 			}
 			catch (Exception e)
 			{

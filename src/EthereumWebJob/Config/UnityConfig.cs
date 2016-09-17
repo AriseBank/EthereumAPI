@@ -1,6 +1,8 @@
 ﻿using System;
+using AzureStorage;
+using AzureStorage.Azure;
+using AzureStorage.Log;
 using EthereumCore;
-using EthereumCore.Azure;
 using EthereumCore.Log;
 using EthereumCore.Settings;
 using EthereumServices;
@@ -17,37 +19,11 @@ namespace EthereumWebJob.Config
 
 			container.RegisterInstance(settings);
 
-			var logToTable = new LogToTable(
-				new AzureTableStorage<LogEntity>(settings.Db.LogsConnString, "JobError", null),
-				new AzureTableStorage<LogEntity>(settings.Db.LogsConnString, "JobWarning", null),
-				new AzureTableStorage<LogEntity>(settings.Db.LogsConnString, "JobInfo", null));
+			AzureDependencyRegister.RegisterLogs(container, settings, "Job");
+			AzureDependencyRegister.RegisterStorage(container, settings);
+			AzureDependencyRegister.RegisterQueues(container, settings);
 
-			container.RegisterInstance(logToTable);
-			container.RegisterType<LogToConsole>();
-
-			container.RegisterType<ILog, LogToTableAndConsole>();
-
-			container.RegisterType<IContractService, ContractService>();
-			container.RegisterType<IPaymentService, PaymentService>();
-			container.RegisterType<IEthereumQueueOutService, EthereumQueueOutService>();
-			container.RegisterType<IContractQueueService, ContractQueueService>();
-			container.RegisterType<IEmailNotifierService, EmailNotifierService>();
-
-			container.RegisterType<Func<string, IQueueExt>>(new InjectionFactory(c =>
-				new Func<string, IQueueExt>(x =>
-				{
-					switch (x)
-					{
-						case Constants.EthereumContractQueue:
-							return new AzureQueueExt(settings.Db.DataConnString, x);
-						case Constants.EthereumOutQueue:
-							return new AzureQueueExt(settings.Db.EthereumNotificationsConnString, x);
-						case Constants.EmailNotifierQueue:
-							return new AzureQueueExt(settings.Db.ExchangeQueueConnString, x);
-						default:
-							throw new Exception("Queue is not registered");
-					}
-				})));
+			ServiceDependencyRegister.Register(container);
 
 			RegisterJobs(container);
 
@@ -59,6 +35,7 @@ namespace EthereumWebJob.Config
 			container.RegisterType<CheckContractQueueCountJob>(new ContainerControlledLifetimeManager());
 			container.RegisterType<CheckPaymentsToUserContractsJob>(new ContainerControlledLifetimeManager());
 			container.RegisterType<RefreshContractQueueJob>(new ContainerControlledLifetimeManager());
+			container.RegisterType<MonitoringJob>(new ContainerControlledLifetimeManager());
 		}
 	}
 }

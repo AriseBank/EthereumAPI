@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using EthereumCore;
-using EthereumCore.Azure;
 using EthereumCore.ContractEvents;
 using EthereumCore.Settings;
 using EthereumServices;

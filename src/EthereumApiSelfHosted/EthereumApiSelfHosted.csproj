@@ -186,6 +186,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AzureStorage\AzureStorage.csproj">
+      <Project>{AE077E71-01F9-4D30-B615-E2A63BEF1164}</Project>
+      <Name>AzureStorage</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EthereumCore\EthereumCore.csproj">
       <Project>{6F67AC7D-0B53-4CF5-BA83-385454666B94}</Project>
       <Name>EthereumCore</Name>
