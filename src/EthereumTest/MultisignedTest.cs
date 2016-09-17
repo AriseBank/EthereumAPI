@@ -11,6 +11,7 @@ using EthereumTest.Init;
 using Microsoft.Practices.Unity;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NBitcoin.Crypto;
+using Nethereum.ABI.Encoders;
 using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.ABI.Util;
 using Nethereum.Core.Signing.Crypto;
@@ -42,16 +43,24 @@ namespace EthereumTest
 		[TestMethod]
 		public async Task TestSignature()
 		{
+			string account_a = "0x960336a077fB32d675405bd0A6cD0cb74aaa5062";
+			string account_b = "0xb295e245eD2fdf5776c3C8a49f0403BF0242262A";
+
 			var web3 = new Web3(_settings.EthereumUrl);
 			await web3.Personal.UnlockAccount.SendRequestAsync(_settings.EthereumMainAccount, _settings.EthereumMainAccountPassword, new HexBigInteger(300));
 
 			string privateKey_a = "4085dde01ea641a0f4fd6586ca11fc1f5df38e1bdcbef501da970cad9335b389";
 
-			var test = "0xb57169e8726c0786a881fc5ea028d10834f64082"; //await CreateContract(web3, GetContractData("Test.abi"), GetContractData("Test.bin"));
+			var test = "0x9cef50cb7f4cce644e45a92d533b184c7ee92d04"; //await CreateContract(web3, GetContractData("Test.abi"), GetContractData("Test.bin"));
 			var contract = web3.Eth.GetContract(GetContractData("Test.abi"), test);
-			await SignMessage(contract, "hellow world", privateKey_a);
+			//await SignMessage(contract, "hellow world", privateKey_a);
 
-			
+			var left = await contract.GetFunction("getHash3").CallAsync<byte[]>(account_a, account_b, 10);
+
+			var str = account_a.HexToByteArray().ToHex() + account_b.HexToByteArray().ToHex() + new IntTypeEncoder().EncodeInt(10).ToHex();
+			var right = new Sha3Keccack().CalculateHash(str.HexToByteArray());
+
+
 		}
 
 		[TestMethod]

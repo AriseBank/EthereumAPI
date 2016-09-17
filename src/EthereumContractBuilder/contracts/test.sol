@@ -5,6 +5,22 @@ contract Test {
 
     }
 
+    function getHash1(address addr) returns (bytes32) {
+        return sha3(addr);
+    }
+
+    function getHash2(address addr, address addr2) returns (bytes32) {
+        return sha3(addr, addr2);
+    }
+
+    function getHash3(address addr, address addr2, uint amount) returns (bytes32) {
+        return sha3(addr, addr2, amount);
+    }
+
+    function getHash4(uint amount) returns (bytes32) {
+        return sha3(amount);
+    }
+
     function getAddressFromSig(bytes32 hash, bytes sig) private returns(address) {
         bytes32 r;
         bytes32 s;
