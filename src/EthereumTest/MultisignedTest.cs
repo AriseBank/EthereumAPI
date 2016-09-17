@@ -10,8 +10,13 @@ using EthereumServices;
 using EthereumTest.Init;
 using Microsoft.Practices.Unity;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NBitcoin.Crypto;
 using Nethereum.ABI.FunctionEncoding.Attributes;
+using Nethereum.ABI.Util;
+using Nethereum.Core.Signing.Crypto;
+using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Hex.HexTypes;
+using Nethereum.RPC.DebugGeth.DTOs;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Web3;
 
@@ -35,8 +40,24 @@ namespace EthereumTest
 		}
 
 		[TestMethod]
+		public async Task TestSignature()
+		{
+			var web3 = new Web3(_settings.EthereumUrl);
+			await web3.Personal.UnlockAccount.SendRequestAsync(_settings.EthereumMainAccount, _settings.EthereumMainAccountPassword, new HexBigInteger(300));
+
+			string privateKey_a = "4085dde01ea641a0f4fd6586ca11fc1f5df38e1bdcbef501da970cad9335b389";
+
+			var test = "0xb57169e8726c0786a881fc5ea028d10834f64082"; //await CreateContract(web3, GetContractData("Test.abi"), GetContractData("Test.bin"));
+			var contract = web3.Eth.GetContract(GetContractData("Test.abi"), test);
+			await SignMessage(contract, "hellow world", privateKey_a);
+
+			
+		}
+
+		[TestMethod]
 		public async Task TestCoin()
 		{
+			const string DefaultAddress = "0x00000000000000000000000000000000";
 			// pass: 123456789
 			string privateKey_a = "4085dde01ea641a0f4fd6586ca11fc1f5df38e1bdcbef501da970cad9335b389";
 			string privateKey_b = "74ed04f45c2a375a94189ef69661fa08235bb3b76be65934a0827262542e870c";
@@ -45,32 +66,39 @@ namespace EthereumTest
 
 			var web3 = new Web3(_settings.EthereumUrl);
 
-			await web3.Personal.UnlockAccount.SendRequestAsync(_settings.EthereumMainAccount, _settings.EthereumMainAccountPassword, new HexBigInteger(120));
+			await web3.Personal.UnlockAccount.SendRequestAsync(_settings.EthereumMainAccount, _settings.EthereumMainAccountPassword, new HexBigInteger(300));
 
-			var main = await CreateContract(web3, GetContractData("MainExchange.abi"), GetContractData("MainExchange.bin"));
-			var coinA = "0x851bb4686606c2dcc191e586ddbea56e781fb8cd"; //await CreateContract(web3, GetContractData("ColorCoin.abi"), GetContractData("ColorCoin.bin"), 1000);
-			var coinB = "0xe52a3a174b85b82f52c787493a27e2472f92904b"; //await CreateContract(web3, GetContractData("ColorCoin.abi"), GetContractData("ColorCoin.bin"), 50000);
-			
+			var main = "0x3e052bb6c4ae2eeb867eb61c2e8ed51a6dfe1641"; //await CreateContract(web3, GetContractData("MainExchange.abi"), GetContractData("MainExchange.bin"));
+			var coinA = "0xcb1f914327b50cb956f4f2f752ec1526727ef58c"; //await CreateContract(web3, GetContractData("ColorCoin.abi"), GetContractData("ColorCoin.bin"), main);
+			var coinB = "0xecac46763bef29cf540496fb17f87c010c10751e"; //await CreateContract(web3, GetContractData("ColorCoin.abi"), GetContractData("ColorCoin.bin"), main);
+
 
 			var mainContract = web3.Eth.GetContract(GetContractData("MainExchange.abi"), main);
 			var coinContract_A = web3.Eth.GetContract(GetContractData("ColorCoin.abi"), coinA);
 			var coinContract_B = web3.Eth.GetContract(GetContractData("ColorCoin.abi"), coinB);
 
-
-			var data = mainContract.GetFunction("swap").GetData(1, account_a, account_b, coinA, coinB, 0, 10);
-			var decoded = mainContract.GetFunction("swap").DecodeInput(data);
-
-
+			
 			//await CoinCashinInternal(web3, coinContract_A, account_a, 200);
 			//await CoinCashinInternal(web3, coinContract_B, account_b, 500);
 
-			var ev = mainContract.GetEvent("ConfirmationNeed");
-			var debug = mainContract.GetEvent("Debug");
-			var filter = await ev.CreateFilterAsync();
-			var filterDebug = await debug.CreateFilterAsync();
+			//var ev = mainContract.GetEvent("ConfirmationNeed");
+
+			//var filter = await ev.CreateFilterAsync();
+
+			string value = account_a + account_b + coinA + coinB + 15 + 20;
+			var hash = new Sha3Keccack().CalculateHash(value).HexToByteArray();
+
+			var client_a_sign = Sign(hash, privateKey_a);
+			var client_b_sign = Sign(hash, privateKey_b);
+
+			var result = await mainContract.GetFunction("swap").CallAsync<bool>(account_a, account_b, coinA, coinB, 15, 20, hash, client_a_sign, client_b_sign);
+
+			
+			//string trHash = await CoinCashoutInternal(web3, mainContract, coinA, account_a, 11, DefaultAddress);
 
 			var transactionHash = await mainContract.GetFunction("swap").SendTransactionAsync(_settings.EthereumMainAccount, new HexBigInteger("200000"), new HexBigInteger(0),
-				1, account_a, account_b, coinA, coinB, 100, 100);
+				account_a, account_b, coinA, coinB, 15, 20, hash, client_a_sign, client_b_sign);
+
 
 			TransactionReceipt receipt;
 
@@ -79,22 +107,11 @@ namespace EthereumTest
 				await Task.Delay(100);
 			}
 
-			var changes = await ev.GetFilterChanges<ConfirmNeededEvent>(filter);
-			var hash = changes.First().Event.Hash;
 
-			//var hash = Convert.FromBase64String("EVKZR/QQD5tb/Ncpa3Qm0d6zKMoQ08SRvqZSxfF2HJI=");
-			var str = Convert.ToBase64String(hash);
 
-			var hs1 = await ConfirmTransaction(web3, mainContract, account_a, privateKey_a, hash);
+			//var changes = await ev.GetFilterChanges<ConfirmNeededEvent>(filter);
+			//var hash = changes.First().Event.Hash;
 
-			var debugChanges = await debug.GetFilterChanges<DebugEvent>(filterDebug);
-
-			var hs2 = await ConfirmTransaction(web3, mainContract, account_b, privateKey_b, hash);
-
-			debugChanges = await debug.GetFilterChanges<DebugEvent>(filterDebug);
-
-			//await CoinCashinInternal(web3, coinContract_A, account_a, 200);
-			//await CoinCashinInternal(web3, coinContract_B, account_b, 500);
 
 			var amount_a_contract_a = await coinContract_A.GetFunction("coinBalanceMultisig").CallAsync<BigInteger>(account_a);
 			var amount_b_contract_a = await coinContract_A.GetFunction("coinBalanceMultisig").CallAsync<BigInteger>(account_b);
@@ -124,8 +141,8 @@ namespace EthereumTest
 		{
 			await web3.Personal.UnlockAccount.SendRequestAsync(_settings.EthereumMainAccount, _settings.EthereumMainAccountPassword, new HexBigInteger(120));
 
-			var transactionHash = await contract.GetFunction("transferMultisig").SendTransactionAsync(_settings.EthereumMainAccount, new HexBigInteger("200000"), new HexBigInteger(0),
-				_settings.EthereumMainAccount, to, amount);
+			var transactionHash = await contract.GetFunction("cashin").SendTransactionAsync(_settings.EthereumMainAccount, new HexBigInteger("200000"), new HexBigInteger(0),
+				to, amount);
 
 			TransactionReceipt receipt;
 
@@ -135,17 +152,34 @@ namespace EthereumTest
 			}
 		}
 
-		private async Task<string> ConfirmTransaction(Web3 web3, Contract contract, string address, string privateKey, byte[] trHash)
+		private async Task<string> CoinCashoutInternal(Web3 web3, Contract contract, string coinContract, string from, int amount, string to)
 		{
-			var func = contract.GetFunction("confirm");
-			var data = func.GetData(trHash);
-			var gas = await func.EstimateGasAsync(trHash);
+
+			await web3.Personal.UnlockAccount.SendRequestAsync(_settings.EthereumMainAccount, _settings.EthereumMainAccountPassword, new HexBigInteger(120));
+
+			var transactionHash = await contract.GetFunction("cashout").SendTransactionAsync(_settings.EthereumMainAccount, new HexBigInteger("200000"), new HexBigInteger(0),
+				coinContract, from, amount, to);
+
+			TransactionReceipt receipt;
+
+			while ((receipt = await web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(transactionHash)) == null)
+			{
+				await Task.Delay(100);
+			}
+
+			return transactionHash;
+		}
+
+		private async Task<string> ConfirmTransaction(string name, Web3 web3, Contract contract, string address, string privateKey, params object[] input)
+		{
+			var func = contract.GetFunction(name);
+			var data = func.GetData(input);
 			var price = await web3.Eth.GasPrice.SendRequestAsync();
 
 			var txCount = await web3.Eth.Transactions.GetTransactionCount.SendRequestAsync(address);
-
-			var encoded = web3.OfflineTransactionSigning.SignTransaction(privateKey, contract.Address, 0, txCount, price.Value, 100000, data);
-
+			
+			var encoded = web3.OfflineTransactionSigning.SignTransaction(privateKey, contract.Address, 0, txCount, price.Value, 200000, data);
+			
 			Assert.IsTrue(web3.OfflineTransactionSigning.VerifyTransaction(encoded));
 
 			var cashout2 = await web3.Eth.Transactions.SendRawTransaction.SendRequestAsync("0x" + encoded);
@@ -157,6 +191,65 @@ namespace EthereumTest
 			}
 
 			return receipt.TransactionHash;
+		}
+
+		private byte[] Sign(byte[] hash, string privateKey)
+		{
+			var key = new ECKey(privateKey.HexToByteArray(), true);
+			var signature = key.SignAndCalculateV(hash);
+
+			var r = signature.R.ToByteArrayUnsigned().ToHexCompact();
+			var s = signature.S.ToByteArrayUnsigned().ToHexCompact();
+			var v = new[] { signature.V }.ToHexCompact();
+
+			var arr = (r + s + v).HexToByteArray();
+			return FixBytesOrder(arr);
+		}
+
+		private async Task<string> SignMessage(Contract contract, string message, string privateKey)
+		{
+			var web3 = new Web3();
+
+			
+
+			var hash = new Sha3Keccack().CalculateHash(message);
+			var hashBytes = hash.HexToByteArray();
+
+			var key = new ECKey(privateKey.HexToByteArray(), true);
+
+			var signature = key.SignAndCalculateV(hashBytes);
+			var test_r = signature.R.ToByteArrayUnsigned().ToHexCompact();
+			var test_s = signature.S.ToByteArrayUnsigned().ToHexCompact();
+			var test_v = new[] { signature.V }.ToHexCompact();
+
+			var der = key.Sign(hashBytes).ToDER();
+			var sss = Encoding.UTF8.GetString(signature.R.ToByteArrayUnsigned());
+			//var hex = "0x" + der.ToHex();
+			//var r = hex.Substring(0, 66).HexToByteArray();
+			//var s = ("0x" + hex.Substring(66, 130 - 66)).HexToByteArray();
+			//var v = ("0x" + hex.Substring(130, 132 - 130)).HexToByteArray();
+			
+			var arr = (test_r + test_s + test_v).HexToByteArray();
+			var resArr = FixBytesOrder(arr);
+
+			var result = await contract.GetFunction("checkSig").CallAsync<bool>("0x960336a077fB32d675405bd0A6cD0cb74aaa5062", hashBytes, resArr);
+			//var result = await contract.GetFunction("calc").CallAsync<string>(hashBytes, 27, test_r.HexToByteArray(), test_s.HexToByteArray());
+			
+			//var t = BitConverter.TO(v, 0);
+
+			//var r = EthECKey.RecoverFromSignature(signature, hashBytes);
+
+			//var address = r.GetPublicAddress();
+
+			return "";
+		}
+
+		private byte[] FixBytesOrder(byte[] source)
+		{
+			if (!BitConverter.IsLittleEndian)
+				return source;
+
+			return source.Reverse().ToArray();
 		}
 
 		private string GetContractData(string name)
@@ -311,7 +404,7 @@ namespace EthereumTest
 		private async Task<string> CreateContract(Web3 web3, string abi, string byteCode, params object[] values)
 		{
 			// deploy contract
-			var transactionHash = await web3.Eth.DeployContract.SendRequestAsync(abi, "0x" + byteCode, _settings.EthereumMainAccount, new HexBigInteger(1000000), values);
+			var transactionHash = await web3.Eth.DeployContract.SendRequestAsync(abi, "0x" + byteCode, _settings.EthereumMainAccount, new HexBigInteger(2000000), values);
 
 			// get contract transaction
 			TransactionReceipt receipt;
@@ -329,6 +422,31 @@ namespace EthereumTest
 			}
 
 			return receipt.ContractAddress;
+		}
+
+		private async Task<string> TransferFunds(Web3 web3, string from, string to, double amount, string password)
+		{
+			var unlockAccountResult =
+				await web3.Personal.UnlockAccount.SendRequestAsync(from, password, new HexBigInteger(120));
+			Assert.IsTrue(unlockAccountResult);
+
+			var unitConversion = new UnitConversion();
+
+			var transactionHash = await web3.Eth.Transactions.SendTransaction.SendRequestAsync(new TransactionInput()
+			{
+				From = from,
+				To = to,
+				Value = new HexBigInteger(unitConversion.ToWei(amount))
+			});
+
+			TransactionReceipt receipt;
+
+			while ((receipt = await web3.Eth.Transactions.GetTransactionReceipt.SendRequestAsync(transactionHash)) == null)
+			{
+				await Task.Delay(100);
+			}
+
+			return transactionHash;
 		}
 
 		public class ConfirmEvent

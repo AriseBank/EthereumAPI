@@ -24,6 +24,9 @@ namespace EthereumCore.Settings
 		int MinContractPoolLength { get; set; }
 		int MaxContractPoolLength { get; set; }
 		decimal MainAccountMinBalance { get; set; }
+
+		EthereumContract ExchangeContract { get; set; }
+		
 	}
 
 	public class BaseSettings : IBaseSettings
@@ -51,12 +54,14 @@ namespace EthereumCore.Settings
 		public int MinContractPoolLength { get; set; } = 100;
 		public int MaxContractPoolLength { get; set; } = 200;
 		public decimal MainAccountMinBalance { get; set; } = 1.0m;
+		public EthereumContract ExchangeContract { get; set; }
 	}
 
 	public class EthereumContract
 	{
 		public string Abi { get; set; }
 		public string ByteCode { get; set; }
+		public string Address { get; set; }
 	}
 
 	public class DbSettings

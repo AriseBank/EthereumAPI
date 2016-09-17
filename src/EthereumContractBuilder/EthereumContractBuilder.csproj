@@ -132,19 +132,27 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="contracts\coin.sol" />
     <Content Include="contracts\coinContract.sol" />
+    <Content Include="contracts\ecrecovery.sol" />
+    <Content Include="contracts\ethContract.sol" />
     <Content Include="contracts\mainContract.sol">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="contracts\multisig.sol" />
+    <Content Include="contracts\test.sol" />
     <Content Include="contracts\userContract.sol">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="contracts\bin\Coin.abi" />
+    <None Include="contracts\bin\Coin.bin" />
     <None Include="contracts\bin\ColorCoin.abi" />
     <None Include="contracts\bin\ColorCoin.bin" />
+    <None Include="contracts\bin\EthCoin.abi" />
+    <None Include="contracts\bin\EthCoin.bin" />
     <None Include="contracts\bin\MainContract.abi">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

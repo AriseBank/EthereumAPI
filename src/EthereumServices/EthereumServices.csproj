@@ -148,6 +148,11 @@
     <Compile Include="EmailNotifierService.cs" />
     <Compile Include="EthereumQueueOutService.cs" />
     <Compile Include="ContractService.cs" />
+    <Compile Include="Exceptions\EthTransactionException.cs" />
+    <Compile Include="Exchange\BaseCoinService.cs" />
+    <Compile Include="Exchange\BaseTransactionService.cs" />
+    <Compile Include="Exchange\ExchangeService.cs" />
+    <Compile Include="Exchange\ICoinService.cs" />
     <Compile Include="PaymentService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

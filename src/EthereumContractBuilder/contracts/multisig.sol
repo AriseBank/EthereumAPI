@@ -1,91 +1,91 @@
-import "./coinContract.sol";
+pragma solidity ^0.4.1;
+import "./coin.sol";
 
 contract MainExchange {
 
-    struct TransferTransaction {
-        uint id;
-        address client_a;
-        address client_b;
-        address coin_a;
-        address coin_b;
-        uint amount_a;
-        uint amount_b;
-        
-        bool client_a_approved;
-        bool client_b_approved;
-    }
-
-    address owner;
+    struct CashoutTransaction {
+        bool exists;
+        address from;
+        address to; // only for ETH coin contract
+        address coin;
+        uint amount;
+    } 
 
     function MainExchange() {
-        owner = msg.sender;
+        _owner = msg.sender;
     }
 
-    event TransferDone(address sender, address from, address to, uint amount);
     event ConfirmationNeed(address client, bytes32 hash);
     event Debug(string msg);
 
-    modifier onlyowner { if (msg.sender == owner) _ }
+    modifier onlyowner { if (msg.sender == _owner) _; }
 
     // can be called only from contract owner
-    function swap(uint id, address client_a, address client_b, address coinAddress_a, 
-                         address coinAddress_b, uint amount_a, uint amount_b) onlyowner {
-
-        var operation = sha3(msg.data, block.number);
-
-        _pending[operation].id = id;
-        _pending[operation].client_a = client_a;
-        _pending[operation].client_b = client_b;
-        _pending[operation].coin_a = coinAddress_a;
-        _pending[operation].coin_b = coinAddress_b;
-        _pending[operation].amount_a = amount_a;
-        _pending[operation].amount_b = amount_b;
-
-        ConfirmationNeed(client_a, operation);
-        ConfirmationNeed(client_b, operation);
-    }
-
-    function confirm(bytes32 operation) {
-        var transaction = _pending[operation];
-        if (transaction.id == uint(0)) {
+    // create swap transaction signed by exchange
+    function swap(address client_a, address client_b, address coinAddress_a, address coinAddress_b, uint amount_a, uint amount_b,
+                    bytes32 hash, bytes client_a_sign, bytes client_b_sign) onlyowner returns(bool) {
+        
+        if (!_checkClientSign(client_a, hash, client_a_sign)) {
+            throw;                    
+        }
+        if (!_checkClientSign(client_b, hash, client_b_sign)) {
             throw;
         }
 
-        Debug("started confirm");
-        if (transaction.client_a == msg.sender) {
-            if (!transaction.client_a_approved) {
-                transaction.client_a_approved = true;
-                Debug("confirmed a");
-            }
-        }
+        _transferCoins(coinAddress_a, client_a, client_b, amount_a, hash, client_a_sign);
+        _transferCoins(coinAddress_b, client_b, client_a, amount_b, hash, client_b_sign);
 
-        if (transaction.client_b == msg.sender) {
-            if (!transaction.client_b_approved) {
-                transaction.client_b_approved = true;
-                Debug("confirmed b");
-            }
-        }
-
-        if (transaction.client_a_approved && transaction.client_b_approved) {
-            internalTransfer(operation);
-        }
+        return true;
     }
 
-    function internalTransfer(bytes32 operation) private {
-        var transaction = _pending[operation];
-        Debug("start transfer");
+    function cashout(uint id, address coinContractAddress, address from, uint amount, address to) onlyowner {
+         // calculate swap transaction hash (id always incremented)
+        var operation = sha3(msg.data, id);
+        throw;
+        _pendingCashout[operation].from = from;
+        _pendingCashout[operation].coin = coinContractAddress;
+        _pendingCashout[operation].amount = amount;
+        _pendingCashout[operation].to = to;
+        _pendingCashout[operation].exists = true;
 
-        transferCoin(transaction.coin_a, transaction.client_a, transaction.client_b, transaction.amount_a);
-
-        transferCoin(transaction.coin_b, transaction.client_b, transaction.client_a, transaction.amount_b);
-
-        Debug("end transfer!");
+        ConfirmationNeed(from, operation);
     }
 
-    function transferCoin(address contractAddress, address from, address to, uint amount) private {
-        var coin_contract = ColorCoin(contractAddress);
-        coin_contract.transferMultisig(from, to, amount);
+    // change coin exchange contract
+    function changeExchangeContract(address coinContract, address newExchangeContract) onlyowner {
+        var coin_contract = Coin(coinContract);
+        coin_contract.changeExchangeContract(newExchangeContract);
+    }
+    
+    function _internalCashout(bytes32 operation) private {
+        var transaction = _pendingCashout[operation];
+
+        var coin_contract = Coin(transaction.coin);
+        coin_contract.cashout(operation, transaction.from, transaction.amount, transaction.to);
     }
 
-    mapping (bytes32 => TransferTransaction) _pending;
+    function _transferCoins(address contractAddress, address from, address to, uint amount, bytes32 hash, bytes sig) private {
+        var coin_contract = Coin(contractAddress);
+        coin_contract.transferMultisig(from, to, amount, hash, sig);
+    }
+
+    function _checkClientSign(address client_addr, bytes32 hash, bytes sig) returns(bool) {
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+
+        assembly {
+            r := mload(add(sig, 32))
+            s := mload(add(sig, 64))
+            v := mload(add(sig, 65))
+        }
+
+        return client_addr == ecrecover(hash, v, r, s);
+    }
+
+    //private fields
+
+    address _owner;
+
+    mapping (bytes32 => CashoutTransaction) _pendingCashout;
 }
