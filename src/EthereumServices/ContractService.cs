@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace EthereumServices
 		Task<HexBigInteger> CreateFilterEventForUserContractPayment();
 		Task<UserPaymentEvent[]> GetNewPaymentEvents(HexBigInteger filter);
 		Task<string[]> GenerateUserContracts(int count = 10);
+		Task<BigInteger> GetCurrentBlock();
 	}
 
 	public class ContractService : IContractService
@@ -103,7 +105,7 @@ namespace EthereumServices
 			var ev = contract.GetEvent("PaymentFromUser");
 
 			var logs = await web3.Eth.Filters.GetFilterChangesForEthNewFilter.SendRequestAsync(filter);
-			
+
 			if (logs == null)
 				return null;
 
@@ -158,6 +160,13 @@ namespace EthereumServices
 			}
 
 			return contractList.ToArray();
+		}
+
+		public async Task<BigInteger> GetCurrentBlock()
+		{
+			var web3 = new Web3(_settings.EthereumUrl);
+			var blockNumber = await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+			return blockNumber.Value;
 		}
 	}
 }
